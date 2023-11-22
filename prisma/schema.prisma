@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  firstName String
+  lastName  String
+  password  String
+  email     String   @unique
+  mobile    String?
+  role      Userrole @default(USER)
+  createAt  DateTime @default(now())
+  updateAt  DateTime @default(now())
+
+  Order Order[]
+}
+
+enum Userrole {
+  ADMIN
+  USER
+}
+
+model Product {
+  id       Int      @id @default(autoincrement())
+  name     String
+  image    String
+  // remove amount
+  amount   Int
+  price    Int
+  // productStatus ProductState @default(AVAILABLE)
+  createAt DateTime @default(now())
+
+  updateAt   DateTime     @default(now())
+  orderItems OrderItems[]
+}
+
+// remove
+// enum ProductState {
+//   AVAILABLE
+//   NOTAVAILABLE
+// }
+
+model Order {
+  id          Int     @id @default(autoincrement())
+  // totalPrice Float or Decimal -> from Product.price x OrderItems.quantity
+  totalAmount Decimal
+  slipURL     String?
+  userId      Int
+
+  user          User         @relation(fields: [userId], references: [id])
+  // remove orderStatus
+  orderStatus   OrderState   @default(COOKING)
+  paymentStatus PaymentState @default(PROCESSING)
+  createAt      DateTime     @default(now())
+  updateAt      DateTime     @default(now())
+  orderItems    OrderItems[]
+}
+
+enum OrderState {
+  COOKING
+  COMPLETE
+}
+
+enum PaymentState {
+  PROCESSING
+  PAID
+}
+
+model OrderItems {
+  id        Int     @id @default(autoincrement())
+  // chnage to quantity
+  quantity  Int
+  // remove price
+  // price     Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  orderId   Int
+}
