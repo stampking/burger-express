@@ -51,12 +51,11 @@ model Product {
 // }
 
 model Order {
-  id          Int     @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   // totalPrice Float or Decimal -> from Product.price x OrderItems.quantity
-  totalAmount Decimal
-  slipURL     String?
-  userId      Int
-
+  totalAmount   Decimal
+  slipURL       String?
+  userId        Int
   user          User         @relation(fields: [userId], references: [id])
   // remove orderStatus
   orderStatus   OrderState   @default(COOKING)

@@ -11,7 +11,7 @@ const { response } = require("express");
 exports.getAllProducts = async (req, res, next) => {
     try {
         const product = await prisma.product.findMany({});
-        res.status(200).json({ product });
+        res.status(200).json(product);
     } catch (err) {
         next(err);
     }
@@ -32,7 +32,7 @@ exports.createProducts = async (req, res, next) => {
         }
         const { value, error } = createProductSchema.validate(req.body);
         console.log("value", value)
-        console.log("error", error)
+
         if (error) {
             error.statusCode = 400;
             return next(error);
@@ -163,3 +163,19 @@ exports.updateStatusProductById = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getProductById = async (req, res, next) => {
+    try {
+
+        const { productId } = req.params
+        console.log('hello', productId)
+        const productById = await prisma.product.findFirst({
+            where: {
+                id: +productId
+            }
+        })
+        res.json({ productById })
+    } catch (error) {
+        next(error)
+    }
+}

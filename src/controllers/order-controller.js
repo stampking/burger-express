@@ -10,8 +10,10 @@ const {
 } = require("../validators/order-validator");
 const { upload } = require("../utils/cloundinary-service");
 
+
 exports.createOrder = async (req, res, next) => {
     try {
+        console.log("reqBody", req.body)
 
         if (req.file) {
             req.body.slipURL = await upload(req.file.path);
@@ -23,24 +25,30 @@ exports.createOrder = async (req, res, next) => {
             error.statusCode = 400;
             return next(error);
         }
+        console.log("value", value)
 
         // value.orderDetail = JSON.parse(value.orderDetail);
         // console.log("orderDetail");
-        value.orderItems = JSON.parse(value.orderItems);
+        // value.orderItems = JSON.parse(value.orderItems);
         // console.log(value.orderItems);
 
         /* Called when press Btn-Submit */
+        console.log(req.user.id, "log User")
         const createOrderProduct = await prisma.order.create({
             data: {
+                // userId: +req.user.id,
                 userId: req.user.id,
-                totalAmount: value.totalAmount,
+                totalAmount: "200",
                 slipURL: value.slipURL,
                 createdAt: value.createdAt,
                 orderStatus: value.orderStatus,
                 paymentStatus: value.paymentStatus,
                 updateAt: value.updateAt,
                 orderItems: {
-                    create: [...value.orderItems],
+                    create: {
+                        productId: +value.itemId,
+                        quantity: 1
+                    },
                 },
             },
             include: {
@@ -49,6 +57,7 @@ exports.createOrder = async (req, res, next) => {
         });
         res.status(201).json({ createOrderProduct });
     } catch (error) {
+        console.log(error)
         next(error);
     }
 };
@@ -95,7 +104,10 @@ exports.updateOrderStatusById = async (req, res, next) => {
 
 exports.getOrderByUserId = async (req, res, next) => {
     try {
-        const { value, error } = getOrderByUserIdSchema.validate(req.body);
+
+        const { userId } = req.params
+        console.log(userId)
+        const { value, error } = getOrderByUserIdSchema.validate(req.params);
 
         if (error) {
             error.statusCode = 400;
@@ -104,7 +116,7 @@ exports.getOrderByUserId = async (req, res, next) => {
 
         const response = await prisma.order.findMany({
             where: {
-                userId: value.userId,
+                userId: +req.params.userId,
             },
             select: {
                 id: true,
@@ -157,7 +169,7 @@ exports.getOrderByUserId = async (req, res, next) => {
             });
         }
 
-        res.status(201).json({ response });
+        res.status(201).json({ order });
     } catch (error) {
         next(error);
     }

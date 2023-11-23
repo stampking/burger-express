@@ -8,6 +8,7 @@ const createError = require('../utils/create-error');
 exports.register = async (req, res, next) => {
 
     try {
+
         const { value, error } = registerSchema.validate(req.body);
         // console.log("value", value)
         // console.log("error", error)
